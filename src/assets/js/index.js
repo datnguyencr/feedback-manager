@@ -10,6 +10,7 @@ import {
     getDatabase,
     ref,
     onValue,
+    remove,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
@@ -40,6 +41,8 @@ const userEmailDisplay = document.getElementById("userEmailDisplay");
 const userAvatar = document.getElementById("userAvatar");
 const searchInput = document.getElementById("searchInput");
 const categoryFilter = document.getElementById("categoryFilter");
+const projectFilter = document.getElementById("projectFilter");
+const sortOrder = document.getElementById("sortOrder");
 
 let allFeedback = [];
 
@@ -107,8 +110,17 @@ function loadFeedback() {
             });
         });
         allFeedback.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        updateProjectFilter();
         renderFeedback();
     });
+}
+
+function updateProjectFilter() {
+    const currentVal = projectFilter.value;
+    const appIds = [...new Set(allFeedback.map((item) => item.appId || "Unknown App"))].sort();
+    
+    projectFilter.innerHTML = '<option value="">All Apps</option>' + 
+        appIds.map(id => `<option value="${id}" ${id === currentVal ? 'selected' : ''}>${id}</option>`).join('');
 }
 const CATEGORY_STYLES = {
     bug: {
@@ -136,13 +148,23 @@ const DEFAULT_STYLE = {
 function renderFeedback() {
     const query = (searchInput.value || "").toLowerCase();
     const category = categoryFilter.value;
+    const project = projectFilter.value;
+    const order = sortOrder.value;
 
-    const filtered = allFeedback.filter((item) => {
+    let filtered = allFeedback.filter((item) => {
         const matchesQuery =
             item.appId?.toLowerCase().includes(query) ||
             item.message?.toLowerCase().includes(query);
         const matchesCategory = !category || item.category === category;
-        return matchesQuery && matchesCategory;
+        const matchesProject = !project || (item.appId || "Unknown App") === project;
+        return matchesQuery && matchesCategory && matchesProject;
+    });
+
+    // Sorting
+    filtered.sort((a, b) => {
+        const timeA = a.createdAt || a.timestamp || 0;
+        const timeB = b.createdAt || b.timestamp || 0;
+        return order === "desc" ? timeB - timeA : timeA - timeB;
     });
 
     statsCount.textContent = filtered.length;
@@ -153,23 +175,30 @@ function renderFeedback() {
             console.log(style);
             return `
         <div class="glass-card border-2 ${style.border} p-4 mb-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div class="flex items-start justify-between mb-2">
+          <div class="flex items-start justify-between mb-1">
             <div>
-              <span class="inline-block px-3 py-1 text-white text-lg font-semibold mb-2">
+              <span class="inline-block px-3 py-1 text-white text-lg font-semibold">
                 ${item.appId || "Unknown App"}
               </span>
-
             </div>
-
             <div class="text-xs text-zinc-500">
               ${formatDate(item.createdAt)}
             </div>
           </div>                   
-
-                <span class="px-3 py-1 ${style.badge} rounded-full text-xs font-semibold">
+          <div class="flex items-center justify-between mt-1">
+              <span class="px-3 py-1 ${style.badge} rounded-full text-xs font-semibold">
                 ${item.category || "Feedback"}
               </span>
-          
+              <button 
+                onclick="deleteFeedback('${item.id}')"
+                class="p-2 text-zinc-500 hover:text-red-500 transition-colors"
+                title="Delete Feedback"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+          </div>
           <p class="text-zinc-200 text-sm leading-relaxed mt-4">
             ${item.message}
           </p>
@@ -187,6 +216,19 @@ function renderFeedback() {
     `;
     }
 }
+
+window.deleteFeedback = async (id) => {
+    if (!confirm("Are you sure you want to delete this feedback?")) return;
+
+    try {
+        const feedbackRef = ref(db, `feedback/${id}`);
+        await remove(feedbackRef);
+        console.log("Feedback deleted successfully");
+    } catch (error) {
+        console.error("Error deleting feedback:", error);
+        alert("Failed to delete feedback: " + error.message);
+    }
+};
 
 function formatDate(timestamp) {
     if (!timestamp) return "Just now";
@@ -209,3 +251,5 @@ function formatDate(timestamp) {
 // Event Listeners
 searchInput.addEventListener("input", renderFeedback);
 categoryFilter.addEventListener("change", renderFeedback);
+projectFilter.addEventListener("change", renderFeedback);
+sortOrder.addEventListener("change", renderFeedback);
