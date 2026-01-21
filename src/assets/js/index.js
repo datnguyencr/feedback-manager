@@ -15,7 +15,8 @@ import {
 const firebaseConfig = {
     apiKey: "AIzaSyAWE3-_J2k0LN07hwsjkxtX_lwUZHyS0LU",
     authDomain: "feedback-manager-fa4a2.firebaseapp.com",
-    databaseURL: "https://feedback-manager-fa4a2-default-rtdb.asia-southeast1.firebasedatabase.app",
+    databaseURL:
+        "https://feedback-manager-fa4a2-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "feedback-manager-fa4a2",
     storageBucket: "feedback-manager-fa4a2.firebasestorage.app",
     messagingSenderId: "971012047862",
@@ -89,7 +90,8 @@ function showDashboard(user) {
     dashboardView.classList.remove("hidden");
     loadingIndicator.classList.add("hidden");
     userEmailDisplay.textContent = user.email;
-    userAvatar.src = user.photoURL || "https://ui-avatars.com/api/?name=" + user.email;
+    userAvatar.src =
+        user.photoURL || "https://ui-avatars.com/api/?name=" + user.email;
     loadFeedback();
 }
 
@@ -101,7 +103,7 @@ function loadFeedback() {
         snap.forEach((child) => {
             allFeedback.push({
                 id: child.key,
-                ...child.val()
+                ...child.val(),
             });
         });
         allFeedback.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
@@ -113,30 +115,35 @@ function renderFeedback() {
     const query = (searchInput.value || "").toLowerCase();
     const category = categoryFilter.value;
 
-    const filtered = allFeedback.filter(item => {
-        const matchesQuery = item.appId?.toLowerCase().includes(query) || 
-                             item.message?.toLowerCase().includes(query);
+    const filtered = allFeedback.filter((item) => {
+        const matchesQuery =
+            item.appId?.toLowerCase().includes(query) ||
+            item.message?.toLowerCase().includes(query);
         const matchesCategory = !category || item.category === category;
         return matchesQuery && matchesCategory;
     });
 
     statsCount.textContent = filtered.length;
-    feedbackList.innerHTML = filtered.map(item => `
-        <div class="glass-card p-6 mb-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    feedbackList.innerHTML = filtered
+        .map(
+            (item) => `
+        <div class="glass-card p-4 mb-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div class="flex items-start justify-between mb-4">
                 <div>
                     <span class="inline-block px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-semibold mb-2">
-                        ${item.appId || 'Unknown App'}
+                        ${item.appId || "Unknown App"}
                     </span>
-                    <h4 class="text-sm text-zinc-400 font-medium">${item.category || 'Feedback'}</h4>
+                    <h4 class="text-sm text-zinc-400 font-medium">${item.category || "Feedback"}</h4>
                 </div>
                 <div class="text-xs text-zinc-500">
-                    ${formatDate(item.timestamp)}
+                    ${formatDate(item.createdAt)}
                 </div>
             </div>
             <p class="text-zinc-200 text-sm leading-relaxed">${item.message}</p>
         </div>
-    `).join("");
+    `,
+        )
+        .join("");
 
     if (filtered.length === 0) {
         feedbackList.innerHTML = `
@@ -153,16 +160,16 @@ function formatDate(timestamp) {
     const date = new Date(timestamp);
     const now = new Date();
     const diff = now - date;
-    
+
     if (diff < 60000) return "Just now";
     if (diff < 3600000) return Math.floor(diff / 60000) + "m ago";
     if (diff < 86400000) return Math.floor(diff / 3600000) + "h ago";
-    
+
     return date.toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
     });
 }
 

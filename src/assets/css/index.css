@@ -38,36 +38,3 @@
     }
 }
 
-/* Custom background animation */
-.bg-blobs {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: -1;
-    overflow: hidden;
-}
-
-.blob {
-    position: absolute;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(
-        circle,
-        rgba(59, 130, 246, 0.2) 0%,
-        transparent 70%
-    );
-    border-radius: 50%;
-    filter: blur(100px);
-    animation: move 20s infinite alternate;
-}
-
-@keyframes move {
-    from {
-        transform: translate(-10%, -10%);
-    }
-    to {
-        transform: translate(110%, 110%);
-    }
-}
