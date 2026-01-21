@@ -110,6 +110,28 @@ function loadFeedback() {
         renderFeedback();
     });
 }
+const CATEGORY_STYLES = {
+    bug: {
+        badge: "bg-red-500/30 text-red-400",
+        border: "border-red-500/50",
+        text: "text-red-500",
+    },
+    idea: {
+        badge: "bg-emerald-500/30 text-emerald-400",
+        border: "border-emerald-500/50",
+        text: "text-emerald-500",
+    },
+    other: {
+        badge: "bg-zinc-500/30 text-zinc-400",
+        border: "border-zinc-500/50",
+        text: "text-gray-400",
+    },
+};
+const DEFAULT_STYLE = {
+    badge: "bg-blue-500/30 text-blue-400",
+    border: "border-blue-500/50",
+    text: "text-zinc-500",
+};
 
 function renderFeedback() {
     const query = (searchInput.value || "").toLowerCase();
@@ -124,34 +146,45 @@ function renderFeedback() {
     });
 
     statsCount.textContent = filtered.length;
+
     feedbackList.innerHTML = filtered
-        .map(
-            (item) => `
-        <div class="glass-card p-4 mb-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div class="flex items-start justify-between mb-4">
-                <div>
-                    <span class="inline-block px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-semibold mb-2">
-                        ${item.appId || "Unknown App"}
-                    </span>
-                    <h4 class="text-sm text-zinc-400 font-medium">${item.category || "Feedback"}</h4>
-                </div>
-                <div class="text-xs text-zinc-500">
-                    ${formatDate(item.createdAt)}
-                </div>
+        .map((item) => {
+            const style = CATEGORY_STYLES[item.category] || DEFAULT_STYLE;
+            console.log(style);
+            return `
+        <div class="glass-card border-2 ${style.border} p-4 mb-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div class="flex items-start justify-between mb-2">
+            <div>
+              <span class="inline-block px-3 py-1 text-white text-lg font-semibold mb-2">
+                ${item.appId || "Unknown App"}
+              </span>
+
             </div>
-            <p class="text-zinc-200 text-sm leading-relaxed">${item.message}</p>
+
+            <div class="text-xs text-zinc-500">
+              ${formatDate(item.createdAt)}
+            </div>
+          </div>                   
+
+                <span class="px-3 py-1 ${style.badge} rounded-full text-xs font-semibold">
+                ${item.category || "Feedback"}
+              </span>
+          
+          <p class="text-zinc-200 text-sm leading-relaxed mt-4">
+            ${item.message}
+          </p>
         </div>
-    `,
-        )
+      `;
+        })
         .join("");
 
     if (filtered.length === 0) {
         feedbackList.innerHTML = `
-            <div class="text-center py-20 text-zinc-500 w-full col-span-full">
-                <i class="opacity-20 text-4xl mb-4 block">📭</i>
-                No feedback found matching your criteria
-            </div>
-        `;
+      <div class="text-center py-20 text-zinc-500 w-full col-span-full">
+        <i class="opacity-20 text-4xl mb-4 block">📭</i>
+        No feedback found matching your criteria
+      </div>
+    `;
     }
 }
 
