@@ -68,7 +68,13 @@ window.handleLogin = async () => {
 };
 
 window.handleLogout = async () => {
-    await signOut(auth);
+    console.log("Logging out...");
+    try {
+        await signOut(auth);
+        console.log("Logged out successfully");
+    } catch (error) {
+        console.error("Logout failed:", error);
+    }
 };
 
 // UI Transitions
@@ -145,7 +151,19 @@ function renderFeedback() {
 function formatDate(timestamp) {
     if (!timestamp) return "Just now";
     const date = new Date(timestamp);
-    return date.toLocaleString();
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 60000) return "Just now";
+    if (diff < 3600000) return Math.floor(diff / 60000) + "m ago";
+    if (diff < 86400000) return Math.floor(diff / 3600000) + "h ago";
+    
+    return date.toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 }
 
 // Event Listeners
