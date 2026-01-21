@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+    --color-glass-bg: rgba(255, 255, 255, 0.05);
+    --color-glass-border: rgba(255, 255, 255, 0.1);
+    --color-glass-glow: rgba(255, 255, 255, 0.02);
+    --radius-glass: 24px;
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+@layer base {
+    body {
+        @apply bg-[#030712] text-zinc-100 min-h-screen font-sans;
+        background-image: 
+            radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+            radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+            radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+        background-attachment: fixed;
+    }
+}
+
+@layer components {
+    .glass-card {
+        @apply bg-glass-bg border border-glass-border backdrop-blur-xl rounded-glass shadow-glass transition-all duration-300;
+    }
+    
+    .glass-card:hover {
+        @apply border-white/20 bg-white/10;
+    }
+
+    .glass-input {
+        @apply bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all;
+    }
+
+    .glass-btn {
+        @apply bg-blue-600/80 hover:bg-blue-600 border border-blue-400/30 rounded-xl px-6 py-2.5 font-medium transition-all active:scale-95 flex items-center justify-center gap-2;
+    }
+
+    .glass-btn-secondary {
+        @apply bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl px-6 py-2.5 font-medium transition-all active:scale-95 flex items-center justify-center gap-2;
+    }
+}
+
+/* Custom background animation */
+.bg-blobs {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.blob {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(100px);
+    animation: move 20s infinite alternate;
+}
+
+@keyframes move {
+    from { transform: translate(-10%, -10%); }
+    to { transform: translate(110%, 110%); }
+}
