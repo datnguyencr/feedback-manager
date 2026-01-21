@@ -11,10 +11,7 @@
 @layer base {
     body {
         @apply bg-[#0f172a] text-zinc-100 min-h-screen font-sans;
-        background-image: 
-            radial-gradient(at 0% 0%, hsla(215, 60%, 18%, 1) 0, transparent 50%), 
-            radial-gradient(at 50% 0%, hsla(217, 91%, 28%, 1) 0, transparent 50%), 
-            radial-gradient(at 100% 0%, hsla(210, 100%, 25%, 1) 0, transparent 50%);
+        background-image: rgb(11, 97, 216);
         background-attachment: fixed;
     }
 }
@@ -23,7 +20,7 @@
     .glass-card {
         @apply bg-glass-bg border border-glass-border backdrop-blur-xl rounded-glass shadow-glass transition-all duration-300;
     }
-    
+
     .glass-card:hover {
         @apply border-white/20 bg-white/10;
     }
@@ -56,13 +53,21 @@
     position: absolute;
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+    background: radial-gradient(
+        circle,
+        rgba(59, 130, 246, 0.2) 0%,
+        transparent 70%
+    );
     border-radius: 50%;
     filter: blur(100px);
     animation: move 20s infinite alternate;
 }
 
 @keyframes move {
-    from { transform: translate(-10%, -10%); }
-    to { transform: translate(110%, 110%); }
+    from {
+        transform: translate(-10%, -10%);
+    }
+    to {
+        transform: translate(110%, 110%);
+    }
 }
