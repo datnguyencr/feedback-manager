@@ -11,6 +11,7 @@ import {
     ref,
     onValue,
     remove,
+    get,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
@@ -29,8 +30,6 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 const provider = new GoogleAuthProvider();
 
-const adminEmail = "datnguyen.cr@gmail.com";
-
 // DOM Elements
 const loginView = document.getElementById("loginView");
 const dashboardView = document.getElementById("dashboardView");
@@ -45,20 +44,40 @@ const projectFilter = document.getElementById("projectFilter");
 const sortOrder = document.getElementById("sortOrder");
 
 let allFeedback = [];
+function normalizeEmail(email) {
+    return email.replace(/\./g, "_");
+}
 
+async function isAdmin(user) {
+    if (!user?.email) return false;
+    try {
+        const adminRef = ref(db, `admins/${normalizeEmail(user.email)}`);
+        const snap = await get(adminRef);
+        return snap.exists();
+    } catch (e) {
+        console.error("Admin check failed", e);
+        return false;
+    }
+}
 // Auth Observer
 onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        if (user.email === adminEmail) {
-            showDashboard(user);
-        } else {
-            alert("Access denied: You are not authorized.");
-            await signOut(auth);
-            showLogin();
-        }
-    } else {
+    if (!user) {
         showLogin();
+        return;
     }
+
+    loadingIndicator.classList.remove("hidden");
+
+    const allowed = await isAdmin(user);
+
+    if (!allowed) {
+        alert("Access denied: You are not authorized.");
+        await signOut(auth);
+        showLogin();
+        return;
+    }
+
+    showDashboard(user);
 });
 
 // Auth Functions
@@ -117,10 +136,18 @@ function loadFeedback() {
 
 function updateProjectFilter() {
     const currentVal = projectFilter.value;
-    const appIds = [...new Set(allFeedback.map((item) => item.appId || "Unknown App"))].sort();
-    
-    projectFilter.innerHTML = '<option value="">All Apps</option>' + 
-        appIds.map(id => `<option value="${id}" ${id === currentVal ? 'selected' : ''}>${id}</option>`).join('');
+    const appIds = [
+        ...new Set(allFeedback.map((item) => item.appId || "Unknown App")),
+    ].sort();
+
+    projectFilter.innerHTML =
+        '<option value="">All Apps</option>' +
+        appIds
+            .map(
+                (id) =>
+                    `<option value="${id}" ${id === currentVal ? "selected" : ""}>${id}</option>`,
+            )
+            .join("");
 }
 const CATEGORY_STYLES = {
     bug: {
@@ -156,7 +183,8 @@ function renderFeedback() {
             item.appId?.toLowerCase().includes(query) ||
             item.message?.toLowerCase().includes(query);
         const matchesCategory = !category || item.category === category;
-        const matchesProject = !project || (item.appId || "Unknown App") === project;
+        const matchesProject =
+            !project || (item.appId || "Unknown App") === project;
         return matchesQuery && matchesCategory && matchesProject;
     });
 
